@@ -47,3 +47,9 @@ func TestParse1(t *testing.T) {
 	test.That(t, dd.Device.Manufacturer, test.ShouldEqual, "FLIR Systems, Inc.")
 	test.That(t, dd.isFLIR(), test.ShouldBeTrue)
 }
+
+func TestPath1(t *testing.T) {
+	test.That(t, Config{}.path(), test.ShouldEqual, "/vis.1")
+	test.That(t, Config{"/vis.1"}.path(), test.ShouldEqual, "/vis.1")
+	test.That(t, Config{"vis.1"}.path(), test.ShouldEqual, "/vis.1")
+}

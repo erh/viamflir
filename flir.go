@@ -14,11 +14,27 @@ import (
 	"go.viam.com/rdk/components/camera"
 	"go.viam.com/rdk/logging"
 	"go.viam.com/rdk/resource"
+	"go.viam.com/rdk/utils"
+
+	"github.com/viam-modules/viamrtsp"
 )
 
 var FlirModel = family.WithModel("flir")
 
 type Config struct {
+	Path string
+}
+
+func (cfg Config) path() string {
+	if cfg.Path == "" {
+		return "/vis.1"
+	}
+
+	if cfg.Path[0] == '/' {
+		return cfg.Path
+	}
+
+	return "/" + cfg.Path
 }
 
 func (cfg *Config) Validate(path string) ([]string, error) {
@@ -34,8 +50,35 @@ func init() {
 		})
 }
 
-func newFlir(ctx context.Context, deps resource.Dependencies, config resource.Config, logger logging.Logger) (camera.Camera, error) {
-	panic(1)
+func newFlir(ctx context.Context, deps resource.Dependencies, conf resource.Config, logger logging.Logger) (camera.Camera, error) {
+	ip, err := FindIP(ctx, logger)
+	if err != nil {
+		return nil, err
+	}
+
+	newConf, err := resource.NativeConfig[*Config](conf)
+	if err != nil {
+		return nil, err
+	}
+
+	cc := viamrtsp.Config{
+		Address: fmt.Sprintf("rtsp://%s:8554/%s", ip, newConf.path()),
+	}
+
+	ccc := resource.Config{
+		Name:             conf.Name,
+		API:              conf.API,
+		Model:            conf.Model,
+		Frame:            conf.Frame,
+		LogConfiguration: conf.LogConfiguration,
+		Attributes: utils.AttributeMap{
+			"rtsp_address": cc.Address,
+		},
+
+		ConvertedAttributes: &cc,
+	}
+
+	return viamrtsp.NewRTSPCamera(ctx, deps, ccc, logger)
 }
 
 func FindIP(ctx context.Context, logger logging.Logger) (string, error) {
