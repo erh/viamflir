@@ -1,0 +1,23 @@
+{
+  "$schema": "https://dl.viam.dev/module.schema.json",
+  "module_id": "erh:viamflir",
+  "visibility": "public",
+  "url": "github.com:erh/viamflir",
+  "description": "viam flir integration",
+  "models": [
+    {
+      "api": "rdk:component:camera",
+      "model": "erh:viamflir:flir"
+    }
+  ],
+  "entrypoint": "viamflir",
+  "build": {
+    "build": "make module",
+    "setup": "",
+    "path": "module.tar.gz",
+    "arch": [
+      "linux/amd64",
+      "linux/arm64"
+    ]
+  }
+}
